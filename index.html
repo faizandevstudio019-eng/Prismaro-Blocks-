@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101126">
+  <meta name="description" content="Discover Prismora Blocks, a colorful block puzzle game featuring strategic placement, satisfying line clears, and offline gameplay.">
+
+  <title>Prismora Blocks — Make Room for Your Next Move</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --background: #101126;
+      --surface: #191b35;
+      --text: #f6f5ff;
+      --muted: #b3b5d0;
+      --purple: #aa8bff;
+      --mint: #72ead0;
+      --border: rgba(255, 255, 255, .1);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 95px;
+    }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    a:focus-visible {
+      outline: 3px solid var(--mint);
+      outline-offset: 6px;
+    }
+
+    .container {
+      width: min(1120px, calc(100% - 40px));
+      margin-inline: auto;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: -80px;
+      left: 20px;
+      z-index: 100;
+      padding: 10px 18px;
+      background: white;
+      color: black;
+      border-radius: 8px;
+    }
+
+    .skip-link:focus {
+      top: 12px;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(16, 17, 38, .94);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .navigation {
+      min-height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+      transform: rotate(-8deg);
+    }
+
+    .brand-icon span {
+      border-radius: 5px;
+      background: var(--purple);
+    }
+
+    .brand-icon span:nth-child(2) {
+      background: var(--mint);
+    }
+
+    .brand-icon span:nth-child(3) {
+      background: #ffc779;
+    }
+
+    .brand-icon span:nth-child(4) {
+      background: #ed85bc;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    nav a {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    nav a:hover {
+      color: white;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 95px 0 85px;
+      background:
+        radial-gradient(ellipse at 80% 35%,
+          rgba(132, 88, 242, .16), transparent 55%);
+    }
+
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      align-items: center;
+      gap: 70px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 22px;
+      color: var(--mint);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    h1, h2, h3, p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 24px;
+      font-size: clamp(44px, 5.7vw, 72px);
+      line-height: 1.08;
+      letter-spacing: -3px;
+    }
+
+    h1 span {
+      color: var(--purple);
+    }
+
+    .hero-description {
+      max-width: 490px;
+      margin-bottom: 30px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 50px;
+      padding: 12px 23px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 750;
+      transition: transform .2s ease, background .2s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      background: #252743;
+    }
+
+    .button-primary {
+      background: var(--purple);
+      color: #151127;
+      border-color: var(--purple);
+    }
+
+    .button-primary:hover {
+      background: #bea6ff;
+    }
+
+    .hero-note {
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .5px;
+    }
+
+    .game-art {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .game-card {
+      padding: 24px;
+      border: 1px solid rgba(182, 156, 255, .25);
+      border-radius: 30px;
+      background: linear-gradient(145deg, #242541, #17182e);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .35);
+      transform: rotate(3deg);
+    }
+
+    .game-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .game-card-top strong {
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    .game-card-top span {
+      color: var(--mint);
+      font-size: 12px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 5px;
+      padding: 10px;
+      border-radius: 15px;
+      background: #101125;
+    }
+
+    .cell {
+      aspect-ratio: 1;
+      border-radius: 5px;
+      background: #25263f;
+    }
+
+    .cell.purple {
+      background: linear-gradient(135deg, #b69aff, #8060d4);
+      box-shadow: inset 0 3px rgba(255, 255, 255, .22);
+    }
+
+    .cell.mint {
+      background: linear-gradient(135deg, #91f3db, #3eb49e);
+      box-shadow: inset 0 3px rgba(255, 255, 255, .25);
+    }
+
+    .cell.gold {
+      background: linear-gradient(135deg, #ffdc91, #e4a749);
+      box-shadow: inset 0 3px rgba(255, 255, 255, .25);
+    }
+
+    .cell.pink {
+      background: linear-gradient(135deg, #ffabd7, #d56ca8);
+      box-shadow: inset 0 3px rgba(255, 255, 255, .25);
+    }
+
+    .art-caption {
+      margin-top: 22px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .feature-strip {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, .02);
+    }
+
+    .strip-items {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding-block: 25px;
+      text-align: center;
+      gap: 20px;
+      color: #d6d3e9;
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .strip-items span + span {
+      border-left: 1px solid var(--border);
+    }
+
+    section.content-section {
+      padding-block: 85px;
+    }
+
+    .section-heading {
+      max-width: 620px;
+      margin-bottom: 35px;
+    }
+
+    .section-label {
+      margin-bottom: 10px;
+      color: var(--purple);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin-bottom: 16px;
+      font-size: clamp(30px, 4vw, 44px);
+      line-height: 1.18;
+      letter-spacing: -1.5px;
+    }
+
+    .section-heading p,
+    .feature-card p,
+    .step p,
+    .about-copy p {
+      color: var(--muted);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .feature-card {
+      padding: 30px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .feature-icon {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 24px;
+      border-radius: 13px;
+      background: rgba(170, 139, 255, .12);
+      color: var(--purple);
+      font-size: 24px;
+    }
+
+    .feature-card:nth-child(2) .feature-icon {
+      color: var(--mint);
+      background: rgba(114, 234, 208, .1);
+    }
+
+    .feature-card:nth-child(3) .feature-icon {
+      color: #ffc779;
+      background: rgba(255, 199, 121, .1);
+    }
+
+    h3 {
+      margin-bottom: 12px;
+      font-size: 19px;
+      letter-spacing: -.4px;
+    }
+
+    .feature-card p {
+      margin-bottom: 0;
+      font-size: 15px;
+    }
+
+    .how-section {
+      background: #14162c;
+      border-block: 1px solid var(--border);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      counter-reset: steps;
+    }
+
+    .step {
+      counter-increment: steps;
+    }
+
+    .step::before {
+      content: "0" counter(steps);
+      display: block;
+      margin-bottom: 20px;
+      color: var(--mint);
+      font-size: 35px;
+      font-weight: 800;
+      letter-spacing: -2px;
+    }
+
+    .step p {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .about-panel {
+      display: grid;
+      grid-template-columns: .8fr 1.2fr;
+      align-items: start;
+      gap: 65px;
+      padding: 48px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background:
+        radial-gradient(circle at 0 100%,
+          rgba(170, 139, 255, .1), transparent 60%),
+        var(--surface);
+    }
+
+    .about-copy p:last-child {
+      margin-bottom: 0;
+    }
+
+    footer {
+      padding: 28px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .footer-content p {
+      margin: 0;
+    }
+
+    .footer-content a:hover {
+      color: white;
+    }
+
+    @media (max-width: 850px) {
+      .hero {
+        padding-top: 60px;
+      }
+
+      .hero-layout {
+        grid-template-columns: 1fr;
+        gap: 50px;
+      }
+
+      .hero-copy {
+        max-width: 620px;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-card {
+        padding: 26px;
+      }
+
+      .about-panel {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 32px;
+      }
+
+      .steps {
+        gap: 24px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        width: calc(100% - 32px);
+      }
+
+      .navigation {
+        flex-direction: column;
+        justify-content: center;
+        gap: 13px;
+        padding-block: 15px;
+      }
+
+      nav {
+        gap: 24px;
+      }
+
+      nav a {
+        font-size: 13px;
+      }
+
+      html {
+        scroll-padding-top: 125px;
+      }
+
+      h1 {
+        letter-spacing: -2px;
+      }
+
+      .hero-description {
+        font-size: 16px;
+      }
+
+      .game-art {
+        max-width: 340px;
+      }
+
+      .game-card {
+        padding: 18px;
+        transform: rotate(1deg);
+      }
+
+      .strip-items {
+        gap: 10px;
+        font-size: 11px;
+      }
+
+      section.content-section {
+        padding-block: 60px;
+      }
+
+      .steps {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+
+      .step::before {
+        margin-bottom: 8px;
+      }
+
+      .about-panel {
+        padding: 25px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .button {
+        transition: none;
+      }
+
+      .button:hover {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+
+<body id="top">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header>
+    <div class="container navigation">
+      <a class="brand" href="#top" aria-label="Prismora Blocks home">
+        <span class="brand-icon" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+        Prismora Blocks
+      </a>
+
+      <nav aria-label="Main navigation">
+        <a href="#features">Features</a>
+        <a href="#how-to-play">How to play</a>
+        <a href="#about">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container hero-layout">
+        <div class="hero-copy">
+          <p class="eyebrow">A colorful block puzzle</p>
+
+          <h1 id="hero-title">
+            Small blocks.<br>
+            <span>Big possibilities.</span>
+          </h1>
+
+          <p class="hero-description">
+            Find the perfect fit, clear the board, and make room
+            for your next move. Discover a satisfying puzzle
+            experience with Prismora Blocks.
+          </p>
+
+          <div class="actions">
+            <a class="button button-primary" href="#how-to-play">
+              Discover how to play
+            </a>
+
+            <a class="button" href="#features">
+              Explore features
+            </a>
+          </div>
+
+          <p class="hero-note">
+            Made for Android · Offline gameplay
+          </p>
+        </div>
+
+        <figure class="game-art">
+          <div class="game-card" aria-hidden="true">
+            <div class="game-card-top">
+              <strong>PRISMORA BLOCKS</strong>
+              <span>Place. Clear. Repeat.</span>
+            </div>
+
+            <div class="board">
+              <!-- Row 1 -->
+              <span class="cell purple"></span>
+              <span class="cell purple"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell mint"></span>
+              <span class="cell mint"></span>
+              <span class="cell mint"></span>
+
+              <!-- Row 2 -->
+              <span class="cell purple"></span>
+              <span class="cell purple"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell mint"></span>
+
+              <!-- Row 3 -->
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell gold"></span>
+              <span class="cell gold"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+
+              <!-- Row 4 -->
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell gold"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell pink"></span>
+              <span class="cell"></span>
+
+              <!-- Row 5 -->
+              <span class="cell mint"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell pink"></span>
+              <span class="cell pink"></span>
+              <span class="cell pink"></span>
+
+              <!-- Row 6 -->
+              <span class="cell mint"></span>
+              <span class="cell"></span>
+              <span class="cell purple"></span>
+              <span class="cell purple"></span>
+              <span class="cell purple"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+
+              <!-- Row 7 -->
+              <span class="cell mint"></span>
+              <span class="cell mint"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell purple"></span>
+              <span class="cell"></span>
+              <span class="cell gold"></span>
+              <span class="cell gold"></span>
+
+              <!-- Row 8 -->
+              <span class="cell pink"></span>
+              <span class="cell pink"></span>
+              <span class="cell pink"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell"></span>
+              <span class="cell gold"></span>
+              <span class="cell gold"></span>
+            </div>
+          </div>
+
+          <figcaption class="art-caption">
+            Puzzle illustration · Not an in-game screenshot
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <div class="feature-strip">
+      <div class="container strip-items">
+        <span>Offline play</span>
+        <span>Colorful puzzles</span>
+        <span>Personal best scores</span>
+      </div>
+    </div>
+
+    <section class="content-section" id="features"
+      aria-labelledby="features-title">
+      <div class="container">
+        <div class="section-heading">
+          <p class="section-label">The experience</p>
+          <h2 id="features-title">Easy to start. Room to improve.</h2>
+          <p>
+            Simple controls meet thoughtful decisions.
+            Every piece brings a new opportunity.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">▦</div>
+            <h3>Make every piece count</h3>
+            <p>
+              Drag blocks onto the board and complete rows or
+              columns. Plan ahead to keep space for the next pieces.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">✦</div>
+            <h3>Keep the clears coming</h3>
+            <p>
+              Discover satisfying combinations, clear multiple
+              lines, and work toward a new personal best.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">☷</div>
+            <h3>Play your way</h3>
+            <p>
+              Enjoy offline gameplay with adjustable music,
+              sound effects, vibration, and reduced motion settings.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section how-section" id="how-to-play"
+      aria-labelledby="how-title">
+      <div class="container">
+        <div class="section-heading">
+          <p class="section-label">How to play</p>
+          <h2 id="how-title">Your next move starts here.</h2>
+        </div>
+
+        <ol class="steps">
+          <li class="step">
+            <h3>Choose a piece</h3>
+            <p>
+              Look at the available blocks and find an open
+              space on the board that matches their shape.
+            </p>
+          </li>
+
+          <li class="step">
+            <h3>Complete a line</h3>
+            <p>
+              Drag a piece into position. Fill an entire row
+              or column to clear it and earn points.
+            </p>
+          </li>
+
+          <li class="step">
+            <h3>Think ahead</h3>
+            <p>
+              Keep enough room for future pieces. The game
+              ends when none of the available pieces can fit.
+            </p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="content-section" id="about"
+      aria-labelledby="about-title">
+      <div class="container">
+        <div class="about-panel">
+          <div>
+            <p class="section-label">About the game</p>
+            <h2 id="about-title">A little space.<br>A fresh challenge.</h2>
+          </div>
+
+          <div class="about-copy">
+            <p>
+              Prismora Blocks is an Android block puzzle game
+              built around a simple idea: finding the right
+              place for every piece.
+            </p>
+
+            <p>
+              Colorful blocks, clear controls, and rewarding
+              line clears make each round easy to pick up.
+              Whether you are trying a new strategy or chasing
+              your best score, the
